@@ -7,6 +7,9 @@ import { Button, Loading, Table, Tabs, Title } from "../components";
 import { AddTask, BoardView, TaskTitle } from "../components/tasks";
 import { useGetAllTaskQuery } from "../redux/slices/api/taskApiSlice";
 import { TASK_TYPE } from "../utils";
+import io from "socket.io-client"; // Import socket.io-client
+
+const socket = io("http://localhost:8800"); // Initialize socket connection
 
 const TABS = [
   { title: "Board View", icon: <MdGridView /> },
@@ -33,6 +36,19 @@ const Tasks = () => {
     refetch();
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, [open]);
+
+  useEffect(() => {
+    // Listen for task updates
+    socket.on("task-updated", () => {
+      refetch();
+    });
+
+    // Clean up the socket connection when the component unmounts
+    return () => {
+      socket.off("task-updated");
+    };
+  }, [refetch]);
+
 
   return isLoading ? (
     <div className='py-10'>

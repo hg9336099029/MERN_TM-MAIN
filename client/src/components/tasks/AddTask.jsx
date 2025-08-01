@@ -124,7 +124,7 @@ const AddTask = ({ open, setOpen, task }) => {
 
       setTimeout(() => {
         setOpen(false);
-        refetch();
+        refetch(); // <-- Make sure this is called after task creation
       }, 500);
     } catch (err) {
       console.log(err);

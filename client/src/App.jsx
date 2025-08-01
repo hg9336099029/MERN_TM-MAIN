@@ -2,22 +2,12 @@ import { Transition } from "@headlessui/react";
 import { Fragment, useRef } from "react";
 import { IoMdClose } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Navbar, Sidebar } from "./components";
-import {
-  Dashboard,
-  Login,
-  Register, // Import Register
-  TaskDetail,
-  Tasks,
-  Trash,
-  Users,
-  StatusPage,
-} from "./pages";
 import { setOpenSidebar } from "./redux/slices/authSlice";
 
-function Layout() {
+export function Layout() {
   const { user } = useSelector((state) => state.auth);
   const location = useLocation();
 
@@ -88,28 +78,14 @@ const MobileSidebar = () => {
   );
 };
 
+// The main App component is no longer needed here for routing.
+// We are only exporting the Layout component.
+// You can leave the file like this.
 const App = () => {
-  const theme = "light";
-
   return (
-    <main className={theme}>
+    <main className='light'>
       <div className='w-full min-h-screen bg-[#f3f4f6] dark:bg-[#0d0d0df4]'>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route index path='/' element={<Navigate to='/dashboard' />} />
-            <Route path='/dashboard' element={<Dashboard />} />
-            <Route path='/tasks' element={<Tasks />} />
-            <Route path='/completed/:status?' element={<Tasks />} />
-            <Route path='/in-progress/:status?' element={<Tasks />} />
-            <Route path='/todo/:status?' element={<Tasks />} />
-            <Route path='/trashed' element={<Trash />} />
-            <Route path='/task/:id' element={<TaskDetail />} />
-            <Route path='/team' element={<Users />} />
-            <Route path='/status' element={<StatusPage />} />
-          </Route>
-          <Route path='/log-in' element={<Login />} />
-          <Route path='/register' element={<Register />} /> {/* Add this route */}
-        </Routes>
+        <Outlet />
       </div>
 
       <Toaster richColors position='top-center' />
