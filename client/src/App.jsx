@@ -8,6 +8,7 @@ import { Navbar, Sidebar } from "./components";
 import {
   Dashboard,
   Login,
+  Register, // Import Register
   TaskDetail,
   Tasks,
   Trash,
@@ -107,6 +108,7 @@ const App = () => {
             <Route path='/status' element={<StatusPage />} />
           </Route>
           <Route path='/log-in' element={<Login />} />
+          <Route path='/register' element={<Register />} /> {/* Add this route */}
         </Routes>
       </div>
 
