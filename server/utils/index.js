@@ -1,52 +1,16 @@
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import dotenv from "dotenv";
-import express from "express";
-import morgan from "morgan";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import { errorHandler, routeNotFound } from "./middleware/errorMiddleware.js";
-import routes from "./routes/index.js";
-import dbConnection from "./utils/connectDB.js";
+import jwt from "jsonwebtoken";
 
-dotenv.config();
-
-dbConnection();
-
-const port = process.env.PORT || 8800;
-const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
-  },
-});
-
-app.use(
-  cors({
-    origin: ["http://localhost:3000"],
-    methods: ["GET", "POST", "DELETE", "PUT"],
-    credentials: true,
-  })
-);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use("/api", routes);
-app.use(routeNotFound);
-app.use(errorHandler);
-
-// Socket.io connection
-io.on("connection", (socket) => {
-  console.log("a user connected");
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
+const createJWT = (res, userId) => {
+  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
   });
-});
 
-// Make io accessible in your controllers
-app.set("socketio", io);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== "development",
+    sameSite: process.env.NODE_ENV === "development" ? "lax" : "none",
+    maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
+  });
+};
 
-httpServer.listen(port, () => console.log(`Server listening on ${port}`));
+export default createJWT;
