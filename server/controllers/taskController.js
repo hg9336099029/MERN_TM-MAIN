@@ -50,17 +50,14 @@ const createTask = asyncHandler(async (req, res) => {
       task: task._id,
     });
 
-    const users = await User.find({
-      _id: team,
-    });
+    await User.updateMany(
+        { _id: { $in: team } },
+        { $push: { tasks: task._id } }
+    );
 
-    if (users) {
-      for (let i = 0; i < users.length; i++) {
-        const user = users[i];
+    const io = req.app.get("socketio");
+    io.emit("task-updated");
 
-        await User.findByIdAndUpdate(user._id, { $push: { tasks: task._id } });
-      }
-    }
 
     res
       .status(200)
@@ -80,7 +77,7 @@ const duplicateTask = asyncHandler(async (req, res) => {
 
     //alert users of the task
     let text = "New task has been assigned to you";
-    if (team.team?.length > 1) {
+    if (task.team?.length > 1) {
       text = text + ` and ${task.team?.length - 1} others.`;
     }
 
@@ -99,8 +96,9 @@ const duplicateTask = asyncHandler(async (req, res) => {
     };
 
     const newTask = await Task.create({
-      ...task,
+      ...task.toObject(),
       title: "Duplicate - " + task.title,
+      _id: undefined,
     });
 
     newTask.team = task.team;
@@ -109,8 +107,9 @@ const duplicateTask = asyncHandler(async (req, res) => {
     newTask.links = task.links;
     newTask.priority = task.priority;
     newTask.stage = task.stage;
-    newTask.activities = activity;
+    newTask.activities = [activity];
     newTask.description = task.description;
+
 
     await newTask.save();
 
@@ -120,10 +119,14 @@ const duplicateTask = asyncHandler(async (req, res) => {
       task: newTask._id,
     });
 
+    const io = req.app.get("socketio");
+    io.emit("task-updated");
+
     res
       .status(200)
       .json({ status: true, message: "Task duplicated successfully." });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ status: false, message: error.message });
   }
 });
@@ -153,9 +156,12 @@ const updateTask = asyncHandler(async (req, res) => {
 
     await task.save();
 
+    const io = req.app.get("socketio");
+    io.emit("task-updated");
+
     res
       .status(200)
-      .json({ status: true, message: "Task duplicated successfully." });
+      .json({ status: true, message: "Task updated successfully." });
   } catch (error) {
     return res.status(400).json({ status: false, message: error.message });
   }
@@ -171,6 +177,9 @@ const updateTaskStage = asyncHandler(async (req, res) => {
     task.stage = stage.toLowerCase();
 
     await task.save();
+
+    const io = req.app.get("socketio");
+    io.emit("task-updated");
 
     res
       .status(200)
@@ -196,6 +205,9 @@ const updateSubTaskStage = asyncHandler(async (req, res) => {
         },
       }
     );
+
+    const io = req.app.get("socketio");
+    io.emit("task-updated");
 
     res.status(200).json({
       status: true,
@@ -226,6 +238,9 @@ const createSubTask = asyncHandler(async (req, res) => {
     task.subTasks.push(newSubTask);
 
     await task.save();
+
+    const io = req.app.get("socketio");
+    io.emit("task-updated");
 
     res
       .status(200)
@@ -316,6 +331,9 @@ const postTaskActivity = asyncHandler(async (req, res) => {
 
     await task.save();
 
+    const io = req.app.get("socketio");
+    io.emit("task-updated");
+
     res
       .status(200)
       .json({ status: true, message: "Activity posted successfully." });
@@ -333,6 +351,9 @@ const trashTask = asyncHandler(async (req, res) => {
     task.isTrashed = true;
 
     await task.save();
+
+    const io = req.app.get("socketio");
+    io.emit("task-updated");
 
     res.status(200).json({
       status: true,
@@ -364,6 +385,9 @@ const deleteRestoreTask = asyncHandler(async (req, res) => {
         { $set: { isTrashed: false } }
       );
     }
+
+    const io = req.app.get("socketio");
+    io.emit("task-updated");
 
     res.status(200).json({
       status: true,

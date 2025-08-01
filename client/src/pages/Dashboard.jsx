@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import moment from "moment";
 import React, { useEffect } from "react";
+import io from "socket.io-client";
 import { FaNewspaper } from "react-icons/fa";
 import { FaArrowsToDot } from "react-icons/fa6";
 import { LuClipboardEdit } from "react-icons/lu";
@@ -14,6 +15,8 @@ import { Chart, Loading, UserInfo } from "../components";
 import { useGetDasboardStatsQuery } from "../redux/slices/api/taskApiSlice";
 import { BGS, PRIOTITYSTYELS, TASK_TYPE, getInitials } from "../utils";
 import { useSelector } from "react-redux";
+
+const socket = io("http://localhost:8800");
 
 const Card = ({ label, count, bg, icon }) => {
   return (
@@ -36,12 +39,18 @@ const Card = ({ label, count, bg, icon }) => {
 };
 
 const Dashboard = () => {
-  const { data, isLoading, error } = useGetDasboardStatsQuery();
+  const { data, isLoading, refetch } = useGetDasboardStatsQuery();
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, []);
+    socket.on("task-updated", () => {
+      refetch();
+    });
+
+    return () => {
+      socket.off("task-updated");
+    };
+  }, [refetch]);
 
   const totals = data?.tasks || [];
 
