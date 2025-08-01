@@ -77,6 +77,28 @@ const Register = () => {
                 error={errors.name ? errors.name.message : ""}
               />
               <Textbox
+                placeholder='Title'
+                type='text'
+                name='title'
+                label='Title'
+                className='w-full rounded-full'
+                register={register("title", {
+                  required: "Title is required!",
+                })}
+                error={errors.title ? errors.title.message : ""}
+              />
+              <Textbox
+                placeholder='Role'
+                type='text'
+                name='role'
+                label='Role'
+                className='w-full rounded-full'
+                register={register("role", {
+                  required: "Role is required!",
+                })}
+                error={errors.role ? errors.role.message : ""}
+              />
+              <Textbox
                 placeholder='you@example.com'
                 type='email'
                 name='email'
