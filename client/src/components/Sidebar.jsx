@@ -11,7 +11,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { setOpenSidebar } from "../redux/slices/authSlice";
-import { IoCheckmarkDoneOutline } from "react-icons/io5";
 
 const linkData = [
   {
@@ -45,11 +44,6 @@ const linkData = [
     icon: <FaUsers />,
   },
   {
-    label: "Status",
-    link: "status",
-    icon: <IoCheckmarkDoneOutline />,
-  },
-  {
     label: "Trash",
     link: "trashed",
     icon: <FaTrashAlt />,
@@ -62,7 +56,7 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const path = location.pathname.split("/")[1];
-  const sidebarLinks = user?.isAdmin ? linkData : linkData.slice(0, 5);
+  const sidebarLinks = user?.isAdmin ? linkData : linkData.slice(0, 8);
 
   const closeSidebar = () => {
     dispatch(setOpenSidebar(false));

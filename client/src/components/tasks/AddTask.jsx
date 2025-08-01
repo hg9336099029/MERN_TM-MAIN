@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import {
   useCreateTaskMutation,
   useUpdateTaskMutation,
+  useGetAllTaskQuery, // Import useGetAllTaskQuery
 } from "../../redux/slices/api/taskApiSlice";
 import { dateFormatter } from "../../utils";
 import { app } from "../../utils/firebase";
@@ -86,6 +87,11 @@ const AddTask = ({ open, setOpen, task }) => {
 
   const [createTask, { isLoading }] = useCreateTaskMutation();
   const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
+  const { refetch } = useGetAllTaskQuery({
+    strQuery: "",
+    isTrashed: "",
+    search: "",
+  });
   const URLS = task?.assets ? [...task.assets] : [];
 
   const handleOnSubmit = async (data) => {
@@ -118,6 +124,7 @@ const AddTask = ({ open, setOpen, task }) => {
 
       setTimeout(() => {
         setOpen(false);
+        refetch();
       }, 500);
     } catch (err) {
       console.log(err);

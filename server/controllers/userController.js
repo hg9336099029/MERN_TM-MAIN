@@ -123,7 +123,7 @@ const getNotificationsList = asyncHandler(async (req, res) => {
 
   const notice = await Notice.find({
     team: userId,
-    isRead: { $nin: [userId] },
+    // isRead: { $nin: [userId] }, // Temporarily commented out for testing
   })
     .populate("task", "title")
     .sort({ _id: -1 });
